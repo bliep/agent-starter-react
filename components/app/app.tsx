@@ -6,6 +6,7 @@ import { useSession } from '@livekit/components-react';
 import { WarningIcon } from '@phosphor-icons/react/dist/ssr';
 import { AgentSessionProvider } from '@/components/agents-ui/agent-session-provider';
 import { StartAudioButton } from '@/components/agents-ui/start-audio-button';
+import { PushToTalkControls } from '@/components/app/push-to-talk';
 import { ViewController } from '@/components/app/view-controller';
 import { Toaster } from '@/components/ui/sonner';
 import { useAgentErrors } from '@/hooks/useAgentErrors';
@@ -43,6 +44,7 @@ export function App({ tokenServerId, tokenEndpoint, agentName, isVideoInputSuppo
       <AppSetup />
       <main className="grid h-svh grid-cols-1 place-content-center">
         <ViewController isVideoInputSupported={isVideoInputSupported} />
+        <PushToTalkControls className="fixed top-4 left-1/2 z-50 -translate-x-1/2" />
       </main>
       <StartAudioButton label="Start Audio" />
       <Toaster
