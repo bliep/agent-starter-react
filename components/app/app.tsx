@@ -6,11 +6,14 @@ import { useSession } from '@livekit/components-react';
 import { WarningIcon } from '@phosphor-icons/react/dist/ssr';
 import { AgentSessionProvider } from '@/components/agents-ui/agent-session-provider';
 import { StartAudioButton } from '@/components/agents-ui/start-audio-button';
+import { LevelPicker } from '@/components/app/level-picker';
 import { PushToTalkControls } from '@/components/app/push-to-talk';
 import { ViewController } from '@/components/app/view-controller';
 import { Toaster } from '@/components/ui/sonner';
+import { useLevel } from '@/hooks/use-level';
 import { useAgentErrors } from '@/hooks/useAgentErrors';
 import { useDebugMode } from '@/hooks/useDebug';
+import { toAgentMetadata } from '@/lib/tutor-level';
 
 const IN_DEVELOPMENT = process.env.NODE_ENV !== 'production';
 
@@ -37,7 +40,11 @@ export function App({ tokenServerId, tokenEndpoint, agentName, isVideoInputSuppo
     [tokenServerId, tokenEndpoint]
   );
 
-  const session = useSession(tokenSource, agentName ? { agentName } : undefined);
+  const [level, setLevel] = useLevel();
+  const session = useSession(
+    tokenSource,
+    agentName ? { agentName, agentMetadata: toAgentMetadata(level) } : undefined
+  );
 
   return (
     <AgentSessionProvider session={session}>
@@ -45,6 +52,11 @@ export function App({ tokenServerId, tokenEndpoint, agentName, isVideoInputSuppo
       <main className="grid h-svh grid-cols-1 place-content-center">
         <ViewController isVideoInputSupported={isVideoInputSupported} />
         <PushToTalkControls className="fixed top-4 left-1/2 z-50 -translate-x-1/2" />
+        <LevelPicker
+          level={level}
+          onLevelChange={setLevel}
+          className="fixed top-4 left-1/2 z-50 -translate-x-1/2"
+        />
       </main>
       <StartAudioButton label="Start Audio" />
       <Toaster

@@ -53,8 +53,8 @@ export default function RootLayout({ children }: RootLayoutProps) {
       )}
     >
       <head>
-        <title>LiveKit Voice Agent</title>
-        <meta name="description" content="A voice agent built with LiveKit" />
+        <title>Tutor de español</title>
+        <meta name="description" content="Voice-first Spanish tutor" />
       </head>
       <body className="overflow-x-hidden">
         <ThemeProvider
