@@ -1,9 +1,9 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { useAgent, useSessionContext } from '@livekit/components-react';
-import { InputMode, TutorRpc } from '@/lib/tutor-rpc';
+import { useTutorRpc } from '@/hooks/use-tutor-rpc';
+import { InputMode } from '@/lib/tutor-rpc';
 
 /** How a push-to-talk turn ends. */
 export enum TurnEnd {
@@ -20,16 +20,10 @@ const HOLD_KEY = ' ';
  * button opens the agent's mic; releasing sends the turn.
  */
 export function usePushToTalk() {
-  const session = useSessionContext();
-  const agent = useAgent();
+  const rpc = useTutorRpc();
   const [mode, setModeState] = useState(InputMode.Open);
   const [isTalking, setIsTalking] = useState(false);
   const talkingRef = useRef(false); // keyboard handlers need the live value
-
-  const rpc = useMemo(
-    () => (agent.isConnected ? new TutorRpc(session.room, agent.identity) : null),
-    [agent.isConnected, agent.identity, session.room]
-  );
 
   const setMode = useCallback(
     async (next: InputMode) => {
