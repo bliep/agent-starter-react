@@ -40,7 +40,7 @@ export function PushToTalkControls({ className }: { className?: string }) {
         <Button
           size="lg"
           variant={isTalking ? 'destructive' : 'outline'}
-          className="touch-none select-none"
+          className="touch-none select-none max-md:fixed max-md:bottom-40 max-md:left-1/2 max-md:z-50 max-md:h-14 max-md:-translate-x-1/2"
           onPointerDown={(event) => {
             event.currentTarget.setPointerCapture(event.pointerId);
             startTalking();

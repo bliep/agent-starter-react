@@ -15,9 +15,9 @@ export enum LessonMode {
 export const LESSON_MODE_LABELS: Record<LessonMode, string> = {
   [LessonMode.Conversation]: 'Conversation',
   [LessonMode.RolePlay]: 'Role-play',
-  [LessonMode.TranslateToSpanish]: 'Translate EN → ES',
-  [LessonMode.TranslateToEnglish]: 'Translate ES → EN',
-  [LessonMode.Repeat]: 'Repeat after me',
+  [LessonMode.TranslateToSpanish]: 'EN → ES',
+  [LessonMode.TranslateToEnglish]: 'ES → EN',
+  [LessonMode.Repeat]: 'Repeat',
 };
 
 const DRILL_MODES = new Set([

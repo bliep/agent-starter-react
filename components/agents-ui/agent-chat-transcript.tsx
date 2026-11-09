@@ -1,6 +1,6 @@
 'use client';
 
-import { type ComponentProps } from 'react';
+import { type ComponentProps, type ReactNode, createContext, useContext } from 'react';
 import { Streamdown } from 'streamdown';
 import { type AgentState, type ReceivedMessage } from '@livekit/components-react';
 import { AgentChatIndicator } from '@/components/agents-ui/agent-chat-indicator';
@@ -15,6 +15,14 @@ import {
   MessageScrollerProvider,
   MessageScrollerViewport,
 } from '@/components/ui/message-scroller';
+
+/**
+ * Optional actions rendered under each agent message (e.g. slow replay, translate).
+ * Provided by the app; the transcript renders nothing extra without it.
+ */
+export const AgentMessageActionsContext = createContext<
+  ((message: ReceivedMessage) => ReactNode) | null
+>(null);
 
 /**
  * Props for the AgentChatTranscript component.
@@ -94,6 +102,8 @@ export function AgentChatTranscript({
   className,
   ...props
 }: AgentChatTranscriptProps) {
+  const renderActions = useContext(AgentMessageActionsContext);
+
   return (
     <MessageScrollerProvider
       autoScroll={autoScroll}
@@ -136,6 +146,7 @@ export function AgentChatTranscript({
                           <Streamdown>{message}</Streamdown>
                         </BubbleContent>
                       </Bubble>
+                      {!isUser && renderActions?.(receivedMessage)}
                     </MessageContent>
                   </Message>
                 </MessageScrollerItem>

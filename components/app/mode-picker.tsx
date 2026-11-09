@@ -27,7 +27,7 @@ interface ModePickerProps {
 export function ModePicker({ request, onChange, disabled, className }: ModePickerProps) {
   return (
     <div className={cn('flex items-center gap-2 text-sm', className)}>
-      <label htmlFor="lesson-mode" className="text-muted-foreground">
+      <label htmlFor="lesson-mode" className="text-muted-foreground max-md:sr-only">
         Mode
       </label>
       <Select
