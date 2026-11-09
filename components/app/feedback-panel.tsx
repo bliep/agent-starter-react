@@ -4,9 +4,15 @@ import { useEffect } from 'react';
 import { useSessionContext } from '@livekit/components-react';
 import { Button } from '@/components/ui/button';
 import { useFeedback } from '@/hooks/use-feedback';
+import { useLessonContext } from '@/hooks/use-lesson-context';
 import { useSessionSummary } from '@/hooks/use-session-summary';
 import { cn } from '@/lib/shadcn/utils';
-import type { FeedbackMessage, SessionSummary } from '@/lib/tutor-feedback';
+import {
+  ERROR_CATEGORY_LABELS,
+  type FeedbackMessage,
+  type LessonContext,
+  type SessionSummary,
+} from '@/lib/tutor-feedback';
 
 /**
  * Explicit corrections and new words per learner turn, newest first.
@@ -16,6 +22,7 @@ export function FeedbackPanel({ className }: { className?: string }) {
   const { isConnected } = useSessionContext();
   const messages = useFeedback();
   const { summary, isLoading, isReady, request, clear } = useSessionSummary();
+  const lesson = useLessonContext();
 
   // A new call starts without the previous call's summary.
   useEffect(() => {
@@ -53,6 +60,8 @@ export function FeedbackPanel({ className }: { className?: string }) {
 
       {summary && <SummaryView summary={summary} />}
 
+      {!summary && lesson && <LessonView lesson={lesson} />}
+
       {!summary && clean > 0 && (
         <p className="text-muted-foreground text-xs">
           {clean} correct {clean === 1 ? 'turn' : 'turns'}
@@ -71,6 +80,37 @@ export function FeedbackPanel({ className }: { className?: string }) {
         </ol>
       )}
     </aside>
+  );
+}
+
+/** What the session opened with: due words (FSRS) and recent mistakes. */
+function LessonView({ lesson }: { lesson: LessonContext }) {
+  if (lesson.due_words.length === 0 && lesson.recent_errors.length === 0) return null;
+
+  return (
+    <section aria-label="Today" className="flex flex-col gap-1.5 border-b pb-3">
+      <h3 className="text-xs font-semibold">Today</h3>
+
+      {lesson.due_words.length > 0 && (
+        <ul className="flex flex-wrap gap-1.5">
+          {lesson.due_words.map((v) => (
+            <li key={v.spanish} className="bg-muted rounded px-1.5 py-0.5 text-xs">
+              <span className="font-medium">{v.spanish}</span> · {v.english}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {lesson.recent_errors.map((e) => (
+        <p key={e.category} className="text-xs">
+          <span className="font-medium">{ERROR_CATEGORY_LABELS[e.category]}</span>
+          <span className="text-muted-foreground">
+            {' '}
+            ×{e.count} · {e.original} → {e.corrected}
+          </span>
+        </p>
+      ))}
+    </section>
   );
 }
 

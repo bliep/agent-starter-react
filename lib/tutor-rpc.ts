@@ -1,5 +1,5 @@
 import type { Room } from 'livekit-client';
-import type { SessionSummary } from '@/lib/tutor-feedback';
+import type { LessonContext, SessionSummary } from '@/lib/tutor-feedback';
 
 /** Learner input mode. Values are the wire payloads the agent expects. */
 export enum InputMode {
@@ -13,6 +13,7 @@ const RPC_PTT_START = 'ptt_start';
 const RPC_PTT_END = 'ptt_end';
 const RPC_PTT_CANCEL = 'ptt_cancel';
 const RPC_SESSION_SUMMARY = 'session_summary';
+const RPC_LESSON_CONTEXT = 'lesson_context';
 
 // The summary runs an LLM over the whole session (~5 s); the RPC default is shorter.
 const SUMMARY_TIMEOUT_MS = 30_000;
@@ -46,6 +47,11 @@ export class TutorRpc {
   async sessionSummary(): Promise<SessionSummary> {
     const json = await this.#call(RPC_SESSION_SUMMARY, '', SUMMARY_TIMEOUT_MS);
     return JSON.parse(json) as SessionSummary;
+  }
+
+  /** Due words and recent mistakes the session opened with. */
+  async lessonContext(): Promise<LessonContext> {
+    return JSON.parse(await this.#call(RPC_LESSON_CONTEXT)) as LessonContext;
   }
 
   #call(method: string, payload = '', responseTimeout?: number): Promise<string> {

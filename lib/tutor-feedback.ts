@@ -10,11 +10,33 @@ export enum UserLanguage {
   Mixed = 'mixed',
 }
 
+/** Mirrors agent/feedback.py `ErrorCategory`. */
+export enum ErrorCategory {
+  SerEstar = 'ser_estar',
+  Agreement = 'agreement',
+  PreteriteImperfect = 'preterite_imperfect',
+  Conjugation = 'conjugation',
+  Preposition = 'preposition',
+  WordChoice = 'word_choice',
+  Other = 'other',
+}
+
+export const ERROR_CATEGORY_LABELS: Record<ErrorCategory, string> = {
+  [ErrorCategory.SerEstar]: 'ser / estar',
+  [ErrorCategory.Agreement]: 'gender & number',
+  [ErrorCategory.PreteriteImperfect]: 'preterite / imperfect',
+  [ErrorCategory.Conjugation]: 'conjugation',
+  [ErrorCategory.Preposition]: 'prepositions',
+  [ErrorCategory.WordChoice]: 'word choice',
+  [ErrorCategory.Other]: 'other',
+};
+
 /** Mirrors agent/feedback.py `Correction`. */
 export interface Correction {
   original: string;
   corrected: string;
   rule: string;
+  category: ErrorCategory;
 }
 
 /** Mirrors agent/feedback.py `VocabItem`. */
@@ -50,6 +72,20 @@ export interface SessionSummary {
   patterns: Pattern[];
   encouragement: string;
   new_words: VocabItem[];
+}
+
+/** Mirrors agent/learner_model.py `RecentError`. */
+export interface RecentError {
+  category: ErrorCategory;
+  count: number;
+  original: string;
+  corrected: string;
+}
+
+/** Mirrors agent/learner_model.py `LessonContext` (lesson_context RPC result). */
+export interface LessonContext {
+  due_words: VocabItem[];
+  recent_errors: RecentError[];
 }
 
 /** Calls `onMessage` for each feedback message; returns an unsubscribe function. */

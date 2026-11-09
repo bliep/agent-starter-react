@@ -8,12 +8,16 @@ import { AgentSessionProvider } from '@/components/agents-ui/agent-session-provi
 import { StartAudioButton } from '@/components/agents-ui/start-audio-button';
 import { FeedbackPanel } from '@/components/app/feedback-panel';
 import { LevelPicker } from '@/components/app/level-picker';
+import { LoginView } from '@/components/app/login-view';
 import { PushToTalkControls } from '@/components/app/push-to-talk';
 import { ViewController } from '@/components/app/view-controller';
+import { Button } from '@/components/ui/button';
 import { Toaster } from '@/components/ui/sonner';
+import { AuthState, useAuth } from '@/hooks/use-auth';
 import { useLevel } from '@/hooks/use-level';
 import { useAgentErrors } from '@/hooks/useAgentErrors';
 import { useDebugMode } from '@/hooks/useDebug';
+import { accessToken, signOut } from '@/lib/auth';
 import { toAgentMetadata } from '@/lib/tutor-level';
 
 const IN_DEVELOPMENT = process.env.NODE_ENV !== 'production';
@@ -32,12 +36,33 @@ interface AppProps {
   isVideoInputSupported: boolean;
 }
 
-export function App({ tokenServerId, tokenEndpoint, agentName, isVideoInputSupported }: AppProps) {
+/** Token endpoint call carrying the learner's current Supabase access token. */
+function authedTokenSource(tokenEndpoint: string) {
+  return TokenSource.custom(async (options) => {
+    const token = await accessToken();
+    const headers: HeadersInit = token ? { Authorization: `Bearer ${token}` } : {};
+    return TokenSource.endpoint(tokenEndpoint, { headers }).fetch(options);
+  });
+}
+
+/** Login first: the token route only serves logged-in learners. */
+export function App(props: AppProps) {
+  const { state } = useAuth();
+
+  if (state === AuthState.LoggedIn) return <TutorApp {...props} />;
+  return (
+    <main className="grid h-svh place-content-center">
+      {state === AuthState.LoggedOut && <LoginView />}
+    </main>
+  );
+}
+
+function TutorApp({ tokenServerId, tokenEndpoint, agentName, isVideoInputSupported }: AppProps) {
   const tokenSource = useMemo(
     () =>
       tokenServerId
         ? TokenSource.developmentTokenServer(tokenServerId)
-        : TokenSource.endpoint(tokenEndpoint),
+        : authedTokenSource(tokenEndpoint),
     [tokenServerId, tokenEndpoint]
   );
 
@@ -59,6 +84,9 @@ export function App({ tokenServerId, tokenEndpoint, agentName, isVideoInputSuppo
           className="fixed top-4 left-1/2 z-50 -translate-x-1/2"
         />
         <FeedbackPanel className="fixed top-20 right-4 bottom-36 z-40 hidden w-72 xl:flex" />
+        <Button size="xs" variant="ghost" onClick={signOut} className="fixed top-4 left-4 z-50">
+          Log out
+        </Button>
       </main>
       <StartAudioButton label="Start Audio" />
       <Toaster

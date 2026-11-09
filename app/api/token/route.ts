@@ -5,6 +5,7 @@ import {
   RoomConfiguration,
   type VideoGrant,
 } from 'livekit-server-sdk';
+import { verifyLearner } from '@/lib/server-auth';
 
 type ConnectionDetails = {
   serverUrl: string;
@@ -18,18 +19,20 @@ const API_KEY = process.env.LIVEKIT_API_KEY;
 const API_SECRET = process.env.LIVEKIT_API_SECRET;
 const LIVEKIT_URL = process.env.LIVEKIT_URL;
 
+const HTTP_UNAUTHORIZED = 401;
+
 // don't cache the results
 export const revalidate = 0;
 
 export async function POST(req: Request) {
-  // make an exception for the vercel preview environment
-  if (process.env.NODE_ENV !== 'development' && process.env.IS_VERCEL_PREVIEW !== 'true') {
-    throw new Error(
-      'THIS API ROUTE IS INSECURE. DO NOT USE THIS ROUTE IN PRODUCTION WITHOUT AN AUTHENTICATION LAYER.'
-    );
-  }
-
   try {
+    // Only logged-in learners get a token; their Supabase id becomes the LiveKit identity,
+    // which the agent uses to load their learner model.
+    const learner = await verifyLearner(req);
+    if (!learner) {
+      return new NextResponse('Not logged in', { status: HTTP_UNAUTHORIZED });
+    }
+
     if (LIVEKIT_URL === undefined) {
       throw new Error('LIVEKIT_URL is not defined');
     }
@@ -47,8 +50,8 @@ export async function POST(req: Request) {
       : new RoomConfiguration();
 
     // Generate participant token
-    const participantName = 'user';
-    const participantIdentity = `voice_assistant_user_${Math.floor(Math.random() * 10_000)}`;
+    const participantName = learner.email.split('@')[0] || 'user';
+    const participantIdentity = learner.id;
     const roomName = `voice_assistant_room_${Math.floor(Math.random() * 10_000)}`;
 
     const participantToken = await createParticipantToken(
