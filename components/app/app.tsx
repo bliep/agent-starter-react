@@ -6,7 +6,7 @@ import { useSession } from '@livekit/components-react';
 import { WarningIcon } from '@phosphor-icons/react/dist/ssr';
 import { AgentSessionProvider } from '@/components/agents-ui/agent-session-provider';
 import { StartAudioButton } from '@/components/agents-ui/start-audio-button';
-import { FeedbackPanel } from '@/components/app/feedback-panel';
+import { LessonWorkspace } from '@/components/app/lesson-workspace';
 import { LevelPicker } from '@/components/app/level-picker';
 import { LoginView } from '@/components/app/login-view';
 import { PushToTalkControls } from '@/components/app/push-to-talk';
@@ -83,7 +83,7 @@ function TutorApp({ tokenServerId, tokenEndpoint, agentName, isVideoInputSupport
           onLevelChange={setLevel}
           className="fixed top-4 left-1/2 z-50 -translate-x-1/2"
         />
-        <FeedbackPanel className="fixed top-20 right-4 bottom-36 z-40 hidden w-72 xl:flex" />
+        <LessonWorkspace />
         <Button size="xs" variant="ghost" onClick={signOut} className="fixed top-4 left-4 z-50">
           Log out
         </Button>
