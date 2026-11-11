@@ -18,6 +18,10 @@ import { toAgentMetadata } from '@/lib/tutor-level';
 
 const IN_DEVELOPMENT = process.env.NODE_ENV !== 'production';
 
+// How long to wait for the agent to join. LiveKit Cloud's free plan puts an idle agent to
+// sleep; waking it takes 10–20 s plus model loading, past the SDK's 20 s default.
+const AGENT_JOIN_TIMEOUT_MS = 90_000;
+
 function AppSetup() {
   useDebugMode({ enabled: IN_DEVELOPMENT });
   useAgentErrors();
@@ -65,7 +69,13 @@ function TutorApp({ tokenServerId, tokenEndpoint, agentName, isVideoInputSupport
   const [level, setLevel] = useLevel();
   const session = useSession(
     tokenSource,
-    agentName ? { agentName, agentMetadata: toAgentMetadata(level) } : undefined
+    agentName
+      ? {
+          agentName,
+          agentMetadata: toAgentMetadata(level),
+          agentConnectTimeoutMilliseconds: AGENT_JOIN_TIMEOUT_MS,
+        }
+      : undefined
   );
 
   return (
