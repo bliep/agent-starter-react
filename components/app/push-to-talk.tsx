@@ -1,57 +1,61 @@
 'use client';
 
-import { useSessionContext } from '@livekit/components-react';
 import { Button } from '@/components/ui/button';
-import { TurnEnd, usePushToTalk } from '@/hooks/use-push-to-talk';
+import { TurnEnd, type usePushToTalk } from '@/hooks/use-push-to-talk';
 import { cn } from '@/lib/shadcn/utils';
 import { InputMode } from '@/lib/tutor-rpc';
+
+/** Push-to-talk state, created once per call screen and shared by both controls below. */
+export type PushToTalk = ReturnType<typeof usePushToTalk>;
 
 const MODE_LABELS: Record<InputMode, string> = {
   [InputMode.Open]: 'Open mic',
   [InputMode.PushToTalk]: 'Push to talk',
 };
 
-/** Input mode switch, plus a hold-to-talk button in push-to-talk mode. Hidden until connected. */
-export function PushToTalkControls({ className }: { className?: string }) {
-  const { isConnected } = useSessionContext();
-  const { isReady, mode, setMode, isTalking, startTalking, stopTalking } = usePushToTalk();
+/** Open mic / push-to-talk switch (top bar). */
+export function InputModeSwitch({ ptt, className }: { ptt: PushToTalk; className?: string }) {
+  return (
+    <div
+      role="radiogroup"
+      aria-label="Input mode"
+      className={cn('flex gap-1 rounded-lg border p-1', className)}
+    >
+      {Object.values(InputMode).map((value) => (
+        <Button
+          key={value}
+          role="radio"
+          aria-checked={ptt.mode === value}
+          size="sm"
+          variant={ptt.mode === value ? 'default' : 'ghost'}
+          disabled={!ptt.isReady}
+          onClick={() => ptt.setMode(value)}
+        >
+          {MODE_LABELS[value]}
+        </Button>
+      ))}
+    </div>
+  );
+}
 
-  if (!isConnected) return null;
+/** Hold-to-talk button (above the call controls); only in push-to-talk mode. */
+export function HoldToTalkButton({ ptt, className }: { ptt: PushToTalk; className?: string }) {
+  if (ptt.mode !== InputMode.PushToTalk) return null;
 
   return (
-    <div className={cn('flex flex-col items-center gap-3', className)}>
-      <div role="radiogroup" aria-label="Input mode" className="flex gap-1 rounded-lg border p-1">
-        {Object.values(InputMode).map((value) => (
-          <Button
-            key={value}
-            role="radio"
-            aria-checked={mode === value}
-            size="sm"
-            variant={mode === value ? 'default' : 'ghost'}
-            disabled={!isReady}
-            onClick={() => setMode(value)}
-          >
-            {MODE_LABELS[value]}
-          </Button>
-        ))}
-      </div>
-
-      {mode === InputMode.PushToTalk && (
-        <Button
-          size="lg"
-          variant={isTalking ? 'destructive' : 'outline'}
-          className="touch-none select-none max-md:fixed max-md:bottom-40 max-md:left-1/2 max-md:z-50 max-md:h-14 max-md:-translate-x-1/2"
-          onPointerDown={(event) => {
-            event.currentTarget.setPointerCapture(event.pointerId);
-            startTalking();
-          }}
-          onPointerUp={() => stopTalking(TurnEnd.Send)}
-          onPointerCancel={() => stopTalking(TurnEnd.Cancel)}
-          onContextMenu={(event) => event.preventDefault()}
-        >
-          {isTalking ? 'Listening… release to send' : 'Hold to talk (or hold space)'}
-        </Button>
-      )}
-    </div>
+    <Button
+      size="lg"
+      variant={ptt.isTalking ? 'destructive' : 'outline'}
+      className={cn('h-14 touch-none text-base select-none', className)}
+      onPointerDown={(event) => {
+        event.currentTarget.setPointerCapture(event.pointerId);
+        ptt.startTalking();
+      }}
+      onPointerUp={() => ptt.stopTalking(TurnEnd.Send)}
+      onPointerCancel={() => ptt.stopTalking(TurnEnd.Cancel)}
+      onContextMenu={(event) => event.preventDefault()}
+    >
+      {ptt.isTalking ? 'Listening… release to send' : 'Hold to talk (or hold space)'}
+    </Button>
   );
 }

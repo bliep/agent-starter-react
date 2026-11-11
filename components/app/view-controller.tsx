@@ -1,13 +1,10 @@
 'use client';
 
-import { useTheme } from 'next-themes';
 import { AnimatePresence, motion } from 'motion/react';
-import { useAgent, useSessionContext } from '@livekit/components-react';
-import { AgentSessionView_01 } from '@/components/agents-ui/blocks/agent-session-view-01';
+import { useSessionContext } from '@livekit/components-react';
 import { WelcomeView } from '@/components/app/welcome-view';
 
 const MotionWelcomeView = motion.create(WelcomeView);
-const MotionSessionView = motion.create(AgentSessionView_01);
 
 const VIEW_MOTION_PROPS = {
   variants: {
@@ -27,14 +24,9 @@ const VIEW_MOTION_PROPS = {
   },
 };
 
-interface ViewControllerProps {
-  isVideoInputSupported: boolean;
-}
-
-export function ViewController({ isVideoInputSupported }: ViewControllerProps) {
+/** Welcome view (start button) before the call; the call screen is TutorLayout. */
+export function ViewController() {
   const { isConnected, start } = useSessionContext();
-  const agent = useAgent();
-  const { resolvedTheme } = useTheme();
 
   return (
     <AnimatePresence mode="wait">
@@ -45,22 +37,6 @@ export function ViewController({ isVideoInputSupported }: ViewControllerProps) {
           {...VIEW_MOTION_PROPS}
           startButtonText="Start call"
           onStartCall={start}
-        />
-      )}
-      {/* Session view */}
-      {isConnected && (
-        <MotionSessionView
-          key="session-view"
-          {...VIEW_MOTION_PROPS}
-          preConnectMessage={
-            agent.isConnected ? 'Agent is listening, ask it a question' : 'Waiting for agent'
-          }
-          supportsChatInput={true}
-          supportsVideoInput={isVideoInputSupported}
-          supportsScreenShare={isVideoInputSupported}
-          isPreConnectBufferEnabled={true}
-          themeMode={resolvedTheme === 'dark' ? 'dark' : 'light'}
-          className="fixed inset-0"
         />
       )}
     </AnimatePresence>

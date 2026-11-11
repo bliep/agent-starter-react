@@ -13,6 +13,10 @@ export enum TurnEnd {
 
 const HOLD_KEY = ' ';
 
+// Every call starts in push-to-talk. The agent starts in open mic (the evals rely on
+// that), so the mode is sent as soon as the agent is reachable.
+const DEFAULT_MODE = InputMode.PushToTalk;
+
 /**
  * Open mic / push-to-talk state for the tutor session.
  *
@@ -24,6 +28,18 @@ export function usePushToTalk() {
   const [mode, setModeState] = useState(InputMode.Open);
   const [isTalking, setIsTalking] = useState(false);
   const talkingRef = useRef(false); // keyboard handlers need the live value
+
+  useEffect(() => {
+    if (!rpc) {
+      setModeState(InputMode.Open); // a new call starts from the agent's default again
+      return;
+    }
+
+    rpc
+      .setInputMode(DEFAULT_MODE)
+      .then(() => setModeState(DEFAULT_MODE))
+      .catch((error) => toast.error(`Could not switch input mode: ${String(error)}`));
+  }, [rpc]);
 
   const setMode = useCallback(
     async (next: InputMode) => {

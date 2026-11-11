@@ -33,7 +33,6 @@ interface AppProps {
   tokenServerId?: string;
   tokenEndpoint: string;
   agentName?: string;
-  isVideoInputSupported: boolean;
 }
 
 /** Token endpoint call carrying the learner's current Supabase access token. */
@@ -57,7 +56,7 @@ export function App(props: AppProps) {
   );
 }
 
-function TutorApp({ tokenServerId, tokenEndpoint, agentName, isVideoInputSupported }: AppProps) {
+function TutorApp({ tokenServerId, tokenEndpoint, agentName }: AppProps) {
   const tokenSource = useMemo(
     () =>
       tokenServerId
@@ -81,11 +80,7 @@ function TutorApp({ tokenServerId, tokenEndpoint, agentName, isVideoInputSupport
   return (
     <AgentSessionProvider session={session}>
       <AppSetup />
-      <TutorLayout
-        level={level}
-        onLevelChange={setLevel}
-        isVideoInputSupported={isVideoInputSupported}
-      />
+      <TutorLayout level={level} onLevelChange={setLevel} />
       <StartAudioButton label="Start Audio" />
       <Toaster
         icons={{

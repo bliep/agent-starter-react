@@ -31,14 +31,21 @@ export function LineActions({ message }: { message: ReceivedMessage }) {
   }
 
   return (
-    <div className="flex flex-col gap-1 px-3">
-      <div className="flex gap-1">
-        <Button size="xs" variant="ghost" onClick={replay} aria-label="Replay slowly">
+    <div className="flex flex-col px-3">
+      <div className="flex gap-0.5">
+        <Button
+          size="xs"
+          variant="ghost"
+          onClick={replay}
+          aria-label="Replay slowly"
+          className="h-5 px-1.5 text-[11px]"
+        >
           Slow
         </Button>
         <Button
           size="xs"
           variant="ghost"
+          className="h-5 px-1.5 text-[11px]"
           onClick={translate}
           disabled={isTranslating}
           aria-label="Translate to English"
