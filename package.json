@@ -15,6 +15,7 @@
     "shadcn:install": "pnpm dlx shadcn@latest add --yes @agents-ui/all && pnpm format"
   },
   "dependencies": {
+    "@azure/msal-browser": "5.26.0",
     "@livekit/components-react": "^2.9.24",
     "@phosphor-icons/react": "^2.1.8",
     "@radix-ui/react-collapsible": "^1.1.12",
@@ -32,7 +33,6 @@
     "@radix-ui/react-use-controllable-state": "^1.2.2",
     "@rive-app/react-webgl2": "^4.26.1",
     "@shadcn/react": "^0.2.1",
-    "@supabase/supabase-js": "^2.119.0",
     "@xyflow/react": "^12.10.0",
     "ai": "^5.0.105",
     "buffer-image-size": "^0.6.4",

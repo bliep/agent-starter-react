@@ -35,7 +35,7 @@ interface AppProps {
   agentName?: string;
 }
 
-/** Token endpoint call carrying the learner's current Supabase access token. */
+/** Token endpoint call carrying the learner's current Entra ID token. */
 function authedTokenSource(tokenEndpoint: string) {
   return TokenSource.custom(async (options) => {
     const token = await accessToken();

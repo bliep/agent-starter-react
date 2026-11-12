@@ -1,24 +1,31 @@
 import { createRemoteJWKSet, jwtVerify } from 'jose';
 
-// Verifies Supabase access tokens on the server (token route). Supabase signs them with
-// an asymmetric key published at SUPABASE_JWKS_URL; jose caches the key set.
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const JWKS_URL = process.env.SUPABASE_JWKS_URL;
-const AUDIENCE = 'authenticated'; // Supabase audience for logged-in users
+// Verifies Entra External ID tokens on the server (token route). Entra signs ID tokens
+// with keys published at the tenant's JWKS endpoint; jose caches the key set.
+const TENANT_ID = process.env.ENTRA_TENANT_ID;
+const TENANT_SUBDOMAIN = process.env.ENTRA_TENANT_SUBDOMAIN;
+const CLIENT_ID = process.env.ENTRA_CLIENT_ID; // ID tokens are issued to the web app itself
+// Evals sign in a test user headlessly (native auth) through a second app registration.
+const EVAL_CLIENT_ID = process.env.ENTRA_EVAL_CLIENT_ID;
 
 const BEARER_PREFIX = 'Bearer ';
 
-const jwks = JWKS_URL ? createRemoteJWKSet(new URL(JWKS_URL)) : null;
+const jwks =
+  TENANT_ID && TENANT_SUBDOMAIN
+    ? createRemoteJWKSet(
+        new URL(`https://${TENANT_SUBDOMAIN}.ciamlogin.com/${TENANT_ID}/discovery/v2.0/keys`)
+      )
+    : null;
 
 export interface VerifiedLearner {
-  id: string; // Supabase user id; becomes the LiveKit identity the agent reads
-  email: string;
+  id: string; // Entra object id (oid); becomes the LiveKit identity the agent reads
+  name: string;
 }
 
-/** The learner behind the request's `Authorization: Bearer <token>`, or null. */
+/** The learner behind the request's `Authorization: Bearer <ID token>`, or null. */
 export async function verifyLearner(req: Request): Promise<VerifiedLearner | null> {
-  if (!jwks || !SUPABASE_URL) {
-    throw new Error('SUPABASE_URL or SUPABASE_JWKS_URL is not defined');
+  if (!jwks || !CLIENT_ID) {
+    throw new Error('ENTRA_TENANT_ID, ENTRA_TENANT_SUBDOMAIN or ENTRA_CLIENT_ID is not defined');
   }
 
   const header = req.headers.get('authorization');
@@ -26,11 +33,11 @@ export async function verifyLearner(req: Request): Promise<VerifiedLearner | nul
 
   try {
     const { payload } = await jwtVerify(header.slice(BEARER_PREFIX.length), jwks, {
-      issuer: `${SUPABASE_URL}/auth/v1`,
-      audience: AUDIENCE,
+      issuer: `https://${TENANT_ID}.ciamlogin.com/${TENANT_ID}/v2.0`,
+      audience: [CLIENT_ID, EVAL_CLIENT_ID].filter((id): id is string => !!id),
     });
-    if (!payload.sub) return null;
-    return { id: payload.sub, email: typeof payload.email === 'string' ? payload.email : '' };
+    if (typeof payload.oid !== 'string') return null;
+    return { id: payload.oid, name: typeof payload.name === 'string' ? payload.name : '' };
   } catch {
     return null;
   }

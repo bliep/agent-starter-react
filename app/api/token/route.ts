@@ -26,7 +26,7 @@ export const revalidate = 0;
 
 export async function POST(req: Request) {
   try {
-    // Only logged-in learners get a token; their Supabase id becomes the LiveKit identity,
+    // Only logged-in learners get a token; their Entra object id becomes the LiveKit identity,
     // which the agent uses to load their learner model.
     const learner = await verifyLearner(req);
     if (!learner) {
@@ -50,7 +50,7 @@ export async function POST(req: Request) {
       : new RoomConfiguration();
 
     // Generate participant token
-    const participantName = learner.email.split('@')[0] || 'user';
+    const participantName = learner.name || 'user';
     const participantIdentity = learner.id;
     const roomName = `voice_assistant_room_${Math.floor(Math.random() * 10_000)}`;
 
