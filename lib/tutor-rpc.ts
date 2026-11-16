@@ -12,6 +12,8 @@ export interface CostBreakdown {
   livekit: number;
   total: number;
   per_minute: number;
+  /** Same money per service/model, e.g. { 'claude-haiku-5-5': 0.012 }. */
+  models: Record<string, number>;
 }
 
 /** Learner input mode. Values are the wire payloads the agent expects. */

@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react';
 import { useTutorRpc } from '@/hooks/use-tutor-rpc';
 import type { CostBreakdown } from '@/lib/tutor-rpc';
 
-const REFRESH_MS = 30_000;
+const REFRESH_MS = 10_000;
 
-/** Running cost of the call, refreshed every 30 s. */
+/** Running cost of the call, refreshed every 10 s. */
 export function useSessionCost(): CostBreakdown | null {
   const rpc = useTutorRpc();
   const [cost, setCost] = useState<CostBreakdown | null>(null);
