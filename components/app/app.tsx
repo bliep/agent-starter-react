@@ -10,11 +10,9 @@ import { LoginView } from '@/components/app/login-view';
 import { TutorLayout } from '@/components/app/tutor-layout';
 import { Toaster } from '@/components/ui/sonner';
 import { AuthState, useAuth } from '@/hooks/use-auth';
-import { useLevel } from '@/hooks/use-level';
 import { useAgentErrors } from '@/hooks/useAgentErrors';
 import { useDebugMode } from '@/hooks/useDebug';
 import { accessToken } from '@/lib/auth';
-import { toAgentMetadata } from '@/lib/tutor-level';
 
 const IN_DEVELOPMENT = process.env.NODE_ENV !== 'production';
 
@@ -65,13 +63,11 @@ function TutorApp({ tokenServerId, tokenEndpoint, agentName }: AppProps) {
     [tokenServerId, tokenEndpoint]
   );
 
-  const [level, setLevel] = useLevel();
   const session = useSession(
     tokenSource,
     agentName
       ? {
           agentName,
-          agentMetadata: toAgentMetadata(level),
           agentConnectTimeoutMilliseconds: AGENT_JOIN_TIMEOUT_MS,
         }
       : undefined
@@ -80,7 +76,7 @@ function TutorApp({ tokenServerId, tokenEndpoint, agentName }: AppProps) {
   return (
     <AgentSessionProvider session={session}>
       <AppSetup />
-      <TutorLayout level={level} onLevelChange={setLevel} />
+      <TutorLayout />
       <StartAudioButton label="Start Audio" />
       <Toaster
         icons={{

@@ -1,25 +1,18 @@
 'use client';
 
 import { useSessionContext } from '@livekit/components-react';
+import { CallStarter } from '@/components/app/call-starter';
 import { ChatDock } from '@/components/app/chat-dock';
 import { LessonPanels } from '@/components/app/lesson-workspace';
-import { LevelPicker } from '@/components/app/level-picker';
 import { ModePicker } from '@/components/app/mode-picker';
 import { InputModeSwitch } from '@/components/app/push-to-talk';
 import { SessionCost } from '@/components/app/session-cost';
 import { SummaryOverlay } from '@/components/app/summary-overlay';
 import { TodayOverlay } from '@/components/app/today-overlay';
-import { ViewController } from '@/components/app/view-controller';
 import { Button } from '@/components/ui/button';
 import { useLessonMode } from '@/hooks/use-lesson-mode';
 import { usePushToTalk } from '@/hooks/use-push-to-talk';
 import { signOut } from '@/lib/auth';
-import type { Level } from '@/lib/tutor-level';
-
-interface TutorLayoutProps {
-  level: Level;
-  onLevelChange: (level: Level) => void;
-}
 
 /**
  * The call screen:
@@ -32,9 +25,9 @@ interface TutorLayoutProps {
  *   │   conversation, last ~2 lines                          │  chat dock
  *   └── mic · chat · end call ───────────────────────────────┘
  *
- * Before the call: the welcome view (start button) and the level picker.
+ * Before the call: CallStarter (connects on login; restart button after hanging up).
  */
-export function TutorLayout({ level, onLevelChange }: TutorLayoutProps) {
+export function TutorLayout() {
   const { isConnected } = useSessionContext();
   const { request, change, isReady } = useLessonMode();
   const ptt = usePushToTalk();
@@ -46,7 +39,6 @@ export function TutorLayout({ level, onLevelChange }: TutorLayoutProps) {
           Log out
         </Button>
         {isConnected && <InputModeSwitch ptt={ptt} />}
-        <LevelPicker level={level} onLevelChange={onLevelChange} />
         {isConnected && (
           <div className="flex flex-col items-end gap-1">
             <div className="flex items-center gap-2">
@@ -61,7 +53,7 @@ export function TutorLayout({ level, onLevelChange }: TutorLayoutProps) {
 
       {!isConnected && (
         <div className="grid flex-1 place-content-center">
-          <ViewController />
+          <CallStarter />
         </div>
       )}
 
