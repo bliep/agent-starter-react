@@ -1,9 +1,13 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { ConnectionState } from 'livekit-client';
 import { useSessionContext } from '@livekit/components-react';
 import { Button } from '@/components/ui/button';
+
+// Module scope, not a ref: this component remounts after every call ends, and a fresh ref
+// would redial (and re-prompt for the mic) in a loop.
+let autoStarted = false;
 
 /**
  * Shown while not in a call. Logging in starts the call right away (once per page load);
@@ -11,16 +15,17 @@ import { Button } from '@/components/ui/button';
  */
 export function CallStarter() {
   const { connectionState, start } = useSessionContext();
-  const started = useRef(false);
+  const [started, setStarted] = useState(autoStarted);
 
   useEffect(() => {
-    if (started.current) return;
+    if (autoStarted) return;
 
-    started.current = true;
+    autoStarted = true;
+    setStarted(true);
     start();
   }, [start]);
 
-  if (connectionState === ConnectionState.Connecting || !started.current) {
+  if (connectionState === ConnectionState.Connecting || !started) {
     return <p className="text-muted-foreground text-sm">Connecting to your tutor…</p>;
   }
 
